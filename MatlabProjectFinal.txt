@@ -1,0 +1,51 @@
+%alireza mohammadzadeh
+%solution to matlab project
+clear
+clc
+T=105; %celcius
+z=[0.31 0.69];
+v=[58.68 106.85];
+b=[713.57 1147.86]; %b12 being b(1) and b21 being b(2) and etc
+alpha=0.529;
+R=1.987; %cal/mol.k
+t=b/(R*(T+273)); %t12 being t(1) and t21 being t(2) and etc
+g=exp(-alpha*t);
+for i=1:2
+j=i*(1/2)^((-1)^i); %to correct the subscripts, if i=2 then j is 1 and vice versa
+gamma(i)=exp(z(j)^2*(t(j)*(g(j)/(z(i)+z(j)*g(j)))^2+(g(i)*t(i)/(z(j)+z(i)*g(i))^2)))
+end
+%calculation of bubble and dew point pressures
+%antoine's law is lnP=A-B/(T+C)
+A=[16.67583 14.00976];
+B=[3674.491 3103.010];
+C=[226.448 219.787];
+for i=1:2
+Ps(i)=exp(A(i)-B(i)/(T+C(i)));%Ps(i) being saturation pressure for component i
+end
+pbubble=(z.*gamma).*Ps;%liquid phase is not ideal
+disp('bubble point pressure is:')
+Pb=sum(pbubble)
+pdew=z./Ps;%vapor phase is ideal therefore we do not use gamma
+disp('dew point pressure is:')
+Pd=(sum(pdew))^(-1)
+disp('flash tower pressure is:')
+P=(Pb+Pd)/2
+V=0.001;
+y=(z.*(Ps.*gamma/P))./(1+V*((Ps.*gamma/P)-1));
+Y=sum(y);
+err=abs(1-Y);
+while err>0.0001
+V=V+0.001;
+y=(z.*(Ps/P).*gamma)./(1+V*((Ps.*gamma/P)-1));
+Y=sum(y);
+err=abs(1-Y);
+end
+disp('moles in vapor phase:')
+V
+disp('moles in liquid phase:')
+L=1-V
+disp('molar ratios is vapor phase:')
+y
+disp('molar ratios is liquid phase:')
+x=y*P./(gamma.*Ps)
+
